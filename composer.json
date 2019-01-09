@@ -1,0 +1,14 @@
+{
+    "name": "chez14/desso",
+    "description": "Jarsig CAS bypasser",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Chris",
+            "email": "christianto.g.14@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
