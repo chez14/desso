@@ -1,14 +1,16 @@
 {
     "name": "chez14/desso",
-    "description": "Jarsig CAS bypasser",
+    "description": "Jasig CAS bypasser",
     "type": "library",
     "license": "MIT",
     "authors": [
         {
             "name": "Chris",
-            "email": "christianto.g.14@gmail.com"
+            "email": "chris@christianto.net"
         }
     ],
     "minimum-stability": "stable",
-    "require": {}
+    "require": {
+        "guzzlehttp/guzzle": "^6.3"
+    }
 }
