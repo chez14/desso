@@ -5,7 +5,9 @@ class Client {
     private static
         $base_url = "https://sso.unpar.ac.id/",
         $cas_login = "login",
-        $cas_logout = "logout",
+        $cas_logout = "logout";
+        
+    public static
         $user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
 
     const
@@ -99,7 +101,17 @@ class Client {
     }
 
     public function serviceLogin(ServiceBase $service) {
+        $client = $this->guzzleClient;
 
+        $service->pre_login();
+        $resp = $client->request("GET", self::$cas_login, [
+            'query'=>[
+                'service'=> $service->get_service()
+            ]
+        ]);
+
+        parse_str(parse_url($resp->getHeader("Location")[0], PHP_URL_QUERY), $queries);
+        return $service->post_login($queries['ticket']);
     }
 
     public function loginValidate():bool {
