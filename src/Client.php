@@ -27,6 +27,22 @@ class Client {
         $useTempCookie = true;
     
     public function __construct($params = []) {
+
+        /**
+         * Temporary Folder
+         */
+        if(\key_exists('temp-folder', $params)){
+            $this->tempFolder = $params['temp-folder'];
+        } else {
+            $this->tempFolder = __DIR__ . '/../tmp';
+        }
+        if(!is_dir($this->tempFolder)){
+            mkdir($this->tempFolder, 0777,true);
+        }
+
+        /**
+         * Cookie
+         */
         $this->guzzleHandlerStack = \GuzzleHttp\HandlerStack::create();
         if(key_exists("cookie", $params)) {
             $this->cookieJarUse($params['cookie'], false);
@@ -43,11 +59,15 @@ class Client {
             'handler' => $this->guzzleHandlerStack,
             'cookies' => $this->cookieJar,
         ];
+
+        /**
+         * Guzzle
+         */
         if(key_exists("guzzle", $params)) {
             $this->guzzleSetting = array_merge($this->guzzleSetting, $params);
         }
-        
         $this->refreshGuzzle();
+        
     }
 
     /**
@@ -66,6 +86,10 @@ class Client {
         $this->u_password = $password;
     }
 
+    /**
+     * Login with provided credential. Will use credential from setCredential if
+     * $username or $password empty.
+     */
     public function login($username = null, $password = null):bool {
         if(empty($username) || empty($password)) {
             $username = $this->u_username;
@@ -103,6 +127,10 @@ class Client {
         return true;
     }
 
+    /**
+     * Login selected service with given crendential.
+     * You must login first before serviceLogin.
+     */
     public function serviceLogin(ServiceBase $service) {
         $client = $this->guzzleClient;
 
@@ -117,6 +145,9 @@ class Client {
         return $service->post_login($queries['ticket']);
     }
 
+    /**
+     * Checks whether login's cookie still effective or not.
+     */
     public function loginValidate():bool {
         $client = $this->guzzleClient;
         // make session, save it to query
@@ -129,6 +160,9 @@ class Client {
         return false;
     }
 
+    /**
+     * Loads cookie Jar/Create them new.
+     */
     public function cookieJarUse($cookiejar, $resetGuzzle=true) {
         $this->cookieFile = $cookieJar;
         $this->useTempCookie = false;
@@ -140,6 +174,9 @@ class Client {
         }
     }
 
+    /**
+     * Save cookie Jar to certain place.
+     */
     public function cookieJarSave($saveTo = null) {
         if($saveTo == null){
             if($this->useTempCookie) {
@@ -168,6 +205,9 @@ class Client {
         }
     }
 
+    /**
+     * Auto delete some temps.
+     */
     public function __destruct() {
         if($this->useTempCookie)
             unlink($this->cookieFile);
