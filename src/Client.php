@@ -8,7 +8,7 @@ class Client {
         $cas_logout = "logout";
         
     public static
-        $user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
+        $user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.96 Safari/537.36";
 
     const
         EXPATTERN = '/<input type="hidden" name="execution" value="([\w\-\_\/\+\=]+)"/',
@@ -21,7 +21,10 @@ class Client {
         $u_password,
         $guzzleClient,
         $guzzleHandlerStack,
-        $cookieJar;
+        $cookieJar,
+        $cookieFile,
+        $tempFolder,
+        $useTempCookie = true;
     
     public function __construct($params = []) {
         $this->guzzleHandlerStack = \GuzzleHttp\HandlerStack::create();
@@ -127,8 +130,9 @@ class Client {
     }
 
     public function cookieJarUse($cookiejar, $resetGuzzle=true) {
-        $pastCookie = [];
-        
+        $this->cookieFile = $cookieJar;
+        $this->useTempCookie = false;
+
         $this->cookieJar = new \GuzzleHttp\Cookie\FileCookieJar($cookiejar, true);
         
         if($resetGuzzle) {
@@ -136,7 +140,13 @@ class Client {
         }
     }
 
-    public function cookieJarSave($saveTo) {
+    public function cookieJarSave($saveTo = null) {
+        if($saveTo == null){
+            if($this->useTempCookie) {
+                throw new \InvalidArgumentException("This time, \$saveTo is not allowed to be null.");
+            }
+            $saveTo = $this->cookieFile;
+        }
         $this->cookieJar->save($saveTo);
     }
 
@@ -148,15 +158,18 @@ class Client {
      * @param $hardReset Set true untuk menyimpan cookie yang lama.
      */
     public function resetCookie($resetGuzzle = true){
-        if(!is_dir(__DIR__ . "/../tmp")) {
-            \mkdir(__DIR__ . "/../tmp");
-            
-        }
-        $tmpfname = tempnam(__DIR__ . "/../tmp", "cookie");
+        $tmpfname = tempnam($this->tempFolder, "cookie");
+        $this->useTempCookie = true;
+        $this->cookieFile = $tmpfname;
         $this->cookieJar = new \GuzzleHttp\Cookie\FileCookieJar($tmpfname, true);
 
         if($resetGuzzle) {
             $this->refreshGuzzle();
         }
+    }
+
+    public function __destruct() {
+        if($this->useTempCookie)
+            unlink($this->cookieFile);
     }
 }
