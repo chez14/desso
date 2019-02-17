@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Chez14\\": "src/"
+            "Chez14\\Desso\\": "src/"
         }
     }
 }
