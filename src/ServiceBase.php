@@ -6,7 +6,7 @@ abstract class ServiceBase {
     
     public abstract function pre_login();
 
-    public abstract function post_login(String $ticket);
+    public abstract function post_login(String $ticket) : bool;
 
     public abstract function validateLogin() : bool;
 }
